@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Terrain 2026">
+<meta http-equiv="Cache-Control" content="max-age=86400">
+<title>Terrain Rapide 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d1b2a;--surf:#162336;--surf2:#1d2f45;--bdr:#253d5a;
+  --acc:#e8a317;--acc2:#2d9cdb;--red:#c0392b;--redbg:#1e0e0e;
+  --grn:#27ae60;--txt:#e8edf2;--mut:#7a8fa4;--tagbg:#1a3050;
+}
+html,body{height:100%;background:var(--bg);color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow:hidden}
+/* HEADER */
+#hd{background:var(--surf);border-bottom:2px solid var(--acc);padding:12px 14px 0}
+#hd-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+#ico{width:34px;height:34px;background:var(--acc);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+#tit{font-size:15px;font-weight:700}
+#sub{font-size:11px;color:var(--mut)}
+#bdg{margin-left:auto;background:var(--acc);color:#000;font-size:11px;
+  font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+/* SEARCH */
+#sw{position:relative;margin-bottom:10px}
+#si{width:100%;background:var(--bg);border:1.5px solid var(--bdr);
+  color:var(--txt);padding:9px 36px;border-radius:10px;font-size:15px;outline:none}
+#si:focus{border-color:var(--acc2)}
+#si::placeholder{color:var(--mut)}
+#sico{position:absolute;left:11px;top:50%;margin-top:-9px;
+  color:var(--mut);pointer-events:none;font-size:16px}
+#sx{position:absolute;right:10px;top:50%;margin-top:-12px;
+  color:var(--mut);background:none;border:none;font-size:22px;
+  cursor:pointer;display:none;padding:0;line-height:1}
+/* FILTER TABS */
+#fb{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none}
+#fb::-webkit-scrollbar{display:none}
+.fb{flex-shrink:0;padding:5px 11px;border-radius:20px;border:1.5px solid var(--bdr);
+  background:transparent;color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.fb.on{background:var(--acc);border-color:var(--acc);color:#000}
+/* LIST */
+#lw{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 12px 100px}
+.ch{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--acc);padding:14px 2px 6px}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px 14px;margin-bottom:8px;cursor:pointer;position:relative}
+.card.dl{border-left:3px solid var(--red);background:var(--redbg)}
+.ct{display:flex;align-items:flex-start;gap:8px}
+.nn{font-family:Menlo,Monaco,"Courier New",monospace;font-size:12px;
+  font-weight:700;color:var(--acc);background:var(--tagbg);
+  padding:2px 7px;border-radius:6px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.lb{font-size:13.5px;line-height:1.45;font-weight:500;color:var(--txt)}
+.cm{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.t{font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.ta{background:#1a2d42;color:#7ab8e0}
+.tc{background:#2a1f0d;color:var(--acc)}
+.td{background:#2d0e0e;color:#e07070}
+.ts{background:#1a2a1a;color:#5cb85c;white-space:normal}
+.ti{background:#2d1b0e;color:#e08040}
+.cv{position:absolute;right:12px;top:50%;margin-top:-10px;
+  color:var(--mut);font-size:18px;font-weight:300}
+/* EMPTY */
+#em{display:none;padding:40px 0;text-align:center;color:var(--mut);font-size:14px}
+/* MODAL */
+#mo{position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.75);z-index:200;display:none;
+  align-items:flex-end;justify-content:center}
+#mo.open{display:flex}
+#md{background:var(--surf);border-radius:20px 20px 0 0;
+  border-top:2px solid var(--bdr);width:100%;max-height:85vh;
+  overflow-y:auto;-webkit-overflow-scrolling:touch}
+#mh{width:40px;height:4px;background:var(--bdr);border-radius:2px;
+  margin:12px auto 0;cursor:pointer}
+#mc{padding:12px 20px 40px}
+.mn{font-family:Menlo,Monaco,"Courier New",monospace;font-size:13px;
+  font-weight:700;color:var(--acc);background:var(--tagbg);
+  padding:3px 10px;border-radius:6px;display:inline-block;margin-bottom:6px}
+.mcat{font-size:11px;color:var(--mut);text-transform:uppercase;
+  letter-spacing:.8px;margin-bottom:10px}
+.mlib{font-size:16px;font-weight:600;line-height:1.5;
+  color:var(--txt);margin-bottom:16px}
+.mr{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.mf{background:var(--bg);border-radius:10px;padding:10px 14px;flex:1;min-width:110px}
+.mfl{font-size:10px;color:var(--mut);text-transform:uppercase;
+  letter-spacing:.8px;margin-bottom:4px;font-weight:600}
+.mfv{font-size:14px;font-weight:600;color:var(--txt)}
+.mfv.dl{color:#e07070}
+.mfv.im{color:#e08040}
+.sb{background:var(--bg);border-radius:10px;padding:12px 14px;
+  margin-bottom:12px;border-left:3px solid var(--grn)}
+.sb .mfl{color:var(--grn)}
+.sb .mfv{font-size:15px;color:var(--grn);line-height:1.4}
+.msrc{font-size:11px;color:var(--mut);text-align:right;margin-top:10px}
+.soff{color:var(--acc2)}
+.smar{color:#9b59b6}
+mark{background:rgba(232,163,23,0.2);color:var(--acc);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div id="hd">
+  <div id="hd-top">
+    <div id="ico">🚔</div>
+    <div>
+      <div id="tit">TERRAIN RAPIDE</div>
+      <div id="sub">Mémentoire Infractions 2026</div>
+    </div>
+    <span id="bdg">62 infractions</span>
+  </div>
+  <div id="sw">
+    <span id="sico">🔍</span>
+    <input id="si" type="search" placeholder="NATINF, libellé, article…"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button id="sx">×</button>
+  </div>
+  <div id="fb"></div>
+</div>
+
+<div id="lw">
+  <div id="li"></div>
+  <div id="em">Aucun résultat</div>
+</div>
+
+<div id="mo">
+  <div id="md">
+    <div id="mh"></div>
+    <div id="mc"></div>
+  </div>
+</div>
+
+<script>
+// ---- DATA ----
+var D = [{"natinf":"11385","libelle":"Conduite de cyclomoteur sans brevet de sécurité routière ou titre européen équivalent - conducteur non titulaire du permis de conduire Arr. du 04/07/1996","article":"R.211-2 R.211-1 R.311-1","classe":"2bis","sanctions":"","immo":"","categorie":"Permis de conduire","src":"MAR"},{"natinf":"6163","libelle":"Circulation avec un véhivule terrestre a moteur sans assurance","article":"L.211-1 / L.324-2","classe":"DÉLIT","sanctions":"Prison 1 an • 3 750 € • Immo/Confiscation","immo":"✓","categorie":"Assurance","src":"OFF"},{"natinf":"6164","libelle":"Non-justification assurance dans les 5 jours","article":"R.211-14","classe":"4","sanctions":"135","immo":"","categorie":"Assurance","src":"OFF"},{"natinf":"11325","libelle":"Franchissement ligne continue","article":"R.412-19","classe":"4bis","sanctions":"-3 pts • 135 €","immo":"","categorie":"Feux - Signalisation","src":"OFF"},{"natinf":"11326","libelle":"Chevauchement ligne continue","article":"R.412-19","classe":"4bis","sanctions":"-1 pt • 135 €","immo":"","categorie":"Feux - Signalisation","src":"OFF"},{"natinf":"12867","libelle":"Conduite de véhicule sans respect d’indications résultant de la signalisation routière","article":"R.411-26 R411-","classe":"2bis","sanctions":"","immo":"","categorie":"Feux - Signalisation","src":"MAR"},{"natinf":"203","libelle":"STOP (interception)","article":"R.415-6","classe":"4bis","sanctions":"-4 pts • 135 €","immo":"","categorie":"Feux - Signalisation","src":"OFF"},{"natinf":"210","libelle":"Feu rouge fixe ou clignotant (interception)","article":"R.412-30","classe":"4bis","sanctions":"-4 pts • 135 € • Rétention PC poss.","immo":"","categorie":"Feux - Signalisation","src":"OFF"},{"natinf":"6111","libelle":"Refus de priorite a une intersection de routes ou l'obligation de ceder le passage est signalee","article":"R.415-7","classe":"4bis","sanctions":"-4 pts • 135 €","immo":"","categorie":"Feux - Signalisation","src":"OFF"},{"natinf":"6112","libelle":"Refus de priorité à une intersection par un conducteur venant de marquer l’arrêt au STOP","article":"R.415-6","classe":"4bis","sanctions":"-4 pts","immo":"","categorie":"Feux - Signalisation","src":"MAR"},{"natinf":"11077","libelle":"Refus priorité VIG (véhicule intérêt général)","article":"R.415-12","classe":"4bis","sanctions":"-4 pts • 135 €","immo":"","categorie":"Priorité","src":"OFF"},{"natinf":"202","libelle":"Refus priorité piéton engagé – passage clouté","article":"R.415-11","classe":"4bis","sanctions":"-4 pts • 135 €","immo":"","categorie":"Priorité","src":"OFF"},{"natinf":"207","libelle":"Refus priorité à droite","article":"R.415-5","classe":"4bis","sanctions":"-4 pts • 135 €","immo":"","categorie":"Priorité","src":"OFF"},{"natinf":"28031","libelle":"Refus priorité piéton manifestant intention de traverser","article":"R.415-11","classe":"4bis","sanctions":"-4 pts • 135 €","immo":"","categorie":"Priorité","src":"OFF"},{"natinf":"6091","libelle":"Refus priorité carrefour giratoire","article":"R.415-10","classe":"4bis","sanctions":"-4 pts • 135 €","immo":"","categorie":"Priorité","src":"OFF"},{"natinf":"217","libelle":"Changement direction sans avertissement préalable","article":"R.412-10","classe":"2","sanctions":"-3 pts • 22 €","immo":"","categorie":"Circulation","src":"OFF"},{"natinf":"6087","libelle":"Contournement par la gauche d’ouvrage etabli sur la chaussée, place ou carrefour","article":"R.412-","classe":"4","sanctions":"","immo":"","categorie":"Circulation","src":"MAR"},{"natinf":"10094","libelle":"Conduite d’un véhicule ou d’un engin à une vitesse excédant l’allure du pas sur trottoir ou terre-plein aménagé en parc de stationnement Dépist. Facult","article":"R.413-","classe":"4bis","sanctions":"","immo":"","categorie":"Stationnement","src":"MAR"},{"natinf":"21200","libelle":"Stationnement très gênant sur emplacement réservé aux véhicules PMR","article":"R.417-11","classe":"4","sanctions":"135 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"21201","libelle":"Arrêt ou Stat. gênant emplacement taxi","article":"R.417-10","classe":"2","sanctions":"35 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"21290","libelle":"gênant sur un emplacement réservé aux livraisons","article":"R.417-10 et L.121-2 CR | L.2213-2 L.2213-3 CGCT","classe":"2","sanctions":"","immo":"","categorie":"Stationnement","src":"MAR"},{"natinf":"22812","libelle":"Stat./arrêt devant borne recharge VE","article":"R.417-10","classe":"2","sanctions":"35 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"22813","libelle":"Arrêt ou stationnement très gênant sur voie réservée aux cyclistes / vélos","article":"R.417-11","classe":"4","sanctions":"135 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"MAR"},{"natinf":"29402","libelle":"Arrêt ou stationnement très gênant d’un véhicule sur un emplacement réservé aux véhicules de transport de fonds ou de métaux précieux Immo","article":"R.417-11 et L.121-2 C.R. Arrêt :31096 | L.2213-3 C.G.C.T.","classe":"4","sanctions":"","immo":"","categorie":"Stationnement","src":"MAR"},{"natinf":"31088","libelle":"Arrêt ou stationnement très gênant sur un passage réservé à la circulation des piétons en traversée de chaussée","article":"R.417-11","classe":"4","sanctions":"135 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"31089","libelle":"Stationnement très gênant d’un véhicule motorisé sur un trottoir","article":"R.417-11 et L.121-2 Station. :","classe":"4","sanctions":"","immo":"","categorie":"Stationnement","src":"MAR"},{"natinf":"31091","libelle":"Stationnement très gênant d'un véhicule motorisé sur une bande ou piste cyclable","article":"R.417-11","classe":"4","sanctions":"135 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"31092","libelle":"Arrêt ou stationnement très gênant d’un véhicule motorisé en amont d’un passage piéton sur une distance de 5 mètres dans le sens de la circulation","article":"R.417-11 et L.121-2 Station. :","classe":"4","sanctions":"","immo":"","categorie":"Stationnement","src":"MAR"},{"natinf":"31093","libelle":"Stationnement très gênant d'un véhicule motorisé au droit d'une bouche d'incendie","article":"R.417-11","classe":"4","sanctions":"135 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"31096","libelle":"Stat. très gênant (PMR, TC, bouche incendie…)","article":"R.417-11","classe":"4","sanctions":"135 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"32532","libelle":"Stat. empiétant sur un passage pour piétons","article":"R.417-5","classe":"2","sanctions":"35 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"32535","libelle":"sur le côté gauche d’une chaussée à double sens en agglomération","article":"R.417-1 et L.121-2","classe":"2","sanctions":"","immo":"","categorie":"Stationnement","src":"MAR"},{"natinf":"7578","libelle":"Stat. gênant trottoir ou passage piéton","article":"R.417-10","classe":"2","sanctions":"35 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"7587","libelle":"Stationnement en double file","article":"R.417-10","classe":"2","sanctions":"35 € • Immo/Fourr.","immo":"✓","categorie":"Stationnement","src":"OFF"},{"natinf":"11065","libelle":"Transport mineur sans système de retenue agréé","article":"R.412-2","classe":"4","sanctions":"90","immo":"","categorie":"Comportement","src":"OFF"},{"natinf":"12929","libelle":"Non-port ceinture — conducteur","article":"R.412-1","classe":"4","sanctions":"-3 pts • 135 €","immo":"","categorie":"Comportement","src":"OFF"},{"natinf":"12930","libelle":"Non-port ceinture — passager","article":"R.412-1","classe":"4","sanctions":"-3 pts • 135 €","immo":"","categorie":"Comportement","src":"OFF"},{"natinf":"23800","libelle":"Téléphone tenu en main (interception)","article":"R.412-6-1","classe":"4bis","sanctions":"-3 pts • 135 € • Rétention PC poss.","immo":"","categorie":"Comportement","src":"OFF"},{"natinf":"31063","libelle":"Oreillette / écouteur / casque audio au volant","article":"R.412-6-1","classe":"4bis","sanctions":"-3 pts • 135 €","immo":"","categorie":"Comportement","src":"OFF"},{"natinf":"11384","libelle":"Conduite de cyclomoteur par un mineur de moins de 14 ans","article":"R.211-2 R311-1","classe":"2bis","sanctions":"","immo":"","categorie":"Deux-roues - Quads","src":"MAR"},{"natinf":"12931","libelle":"Moto sans casque homologué ou non attaché","article":"R.431-1","classe":"4bis","sanctions":"-3 pts • 90 € • Immo poss.","immo":"✓","categorie":"Deux-roues - Quads","src":"OFF"},{"natinf":"12932","libelle":"Cyclomoteur sans casque homologué ou non attaché","article":"R.431-1","classe":"4bis","sanctions":"90 € • Immo poss.","immo":"✓","categorie":"Deux-roues - Quads","src":"OFF"},{"natinf":"12933","libelle":"Passager moto/cyclo sans casque","article":"R.431-1","classe":"4bis","sanctions":"90","immo":"","categorie":"Deux-roues - Quads","src":"OFF"},{"natinf":"9921","libelle":"Transport non autorisé d’un passager sur une moto, tricycle, quadricycle, cyclomoteur ou cycle - absence de siège fixé au véhicule","article":"R.431-5","classe":"2","sanctions":"","immo":"","categorie":"Deux-roues - Quads","src":"MAR"},{"natinf":"33355","libelle":"Trottoir à vitesse > allure du pas","article":"R.412-43-1","classe":"2","sanctions":"35","immo":"","categorie":"EDPM","src":"OFF"},{"natinf":"33362","libelle":"Transport de passager sur EDPM","article":"R.412-43-2","classe":"4","sanctions":"135","immo":"","categorie":"EDPM","src":"OFF"},{"natinf":"12522","libelle":"Défaut contrôle technique VL ≤ 3,5 T","article":"R.323-22","classe":"4bis","sanctions":"90 € • Circ. prov. 7j • Immo/Fourr.","immo":"✓","categorie":"Contrôle du véhicule","src":"OFF"},{"natinf":"12523","libelle":"Défaut contrôle technique CTTE > 3,5 T","article":"R.323-22","classe":"4bis","sanctions":"90 € • Immo","immo":"✓","categorie":"Contrôle du véhicule","src":"OFF"},{"natinf":"13313","libelle":"Emission de bruits portant atteinte à la tranquillité du voisinage ou à la santé de l’homme Exemple: Usage d’un autoradio avec un volume sonore trés élevé","article":"R.1337-7 R.1336-5, R.1336-4 | et R.1337-8","classe":"4","sanctions":"","immo":"","categorie":"Contrôle du véhicule","src":"MAR"},{"natinf":"32033","libelle":"Conduite d’un cyclomoteur sans port de gants conformes à la réglementa- tion relative aux équipements de protection individuelle Arrêt.Minist. du 19/09/2016","article":"R.431-1-2","classe":"3bis","sanctions":"","immo":"","categorie":"Contrôle du véhicule","src":"MAR"},{"natinf":"32034","libelle":"Conduite d’une motocyclette sans port de gants conformes à la réglementa- tion relative aux équipements de 1 pts protection individuelle Arrêt.Minist. du 19/09/2016","article":"R.431-1-2","classe":"3bis","sanctions":"-1 pts","immo":"","categorie":"Contrôle du véhicule","src":"MAR"},{"natinf":"32933","libelle":"Transport de passager en nombre supérieur à celui des places assises mentionné dans le certificat d’immatriculation d’un véhicule à moteur","article":"R.412-1-1","classe":"4bis","sanctions":"-3 pts","immo":"","categorie":"Contrôle du véhicule","src":"MAR"},{"natinf":"6126","libelle":"Émission de bruits gênants – silencieux non conforme","article":"R.318-3","classe":"4","sanctions":"135 € • Immo","immo":"✓","categorie":"Contrôle du véhicule","src":"OFF"},{"natinf":"25124","libelle":"Refus d'obtempérer risque de mort — DÉLIT aggravé","article":"L.233-1","classe":"DÉLIT","sanctions":"-6 pts • Prison 5 ans • 75 000 € • Confiscation","immo":"","categorie":"Refus - Fuite","src":"OFF"},{"natinf":"2678","libelle":"Délit de fuite après accident — DÉLIT","article":"L.231-1","classe":"DÉLIT","sanctions":"-6 pts • Prison 5 ans • 75 000 € • Confiscation","immo":"","categorie":"Refus - Fuite","src":"OFF"},{"natinf":"50","libelle":"Refus d'obtempérer à une sommation — DÉLIT","article":"L.233-1","classe":"DÉLIT","sanctions":"-6 pts • Prison 1 an • 15 000 €","immo":"","categorie":"Refus - Fuite","src":"OFF"},{"natinf":"7543","libelle":"Mise en circulation d'un véhicule sans certificat d'immatriculation","article":"R.322-1","classe":"4bis","sanctions":"90 € • Immo","immo":"✓","categorie":"Documents","src":"OFF"},{"natinf":"7544","libelle":"CG non mise au nom nouveau propriétaire dans 30j","article":"R.322-5","classe":"4bis","sanctions":"90 • Immo","immo":"✓","categorie":"Documents","src":"OFF"},{"natinf":"256","libelle":"Sens interdit","article":"R.412-28","classe":"4bis","sanctions":"-4 pts • 135 €","immo":"","categorie":"Feux - Signalisation","src":"OFF"},{"natinf":"33360","libelle":"Conducteur EDPM < 14 ans","article":"R.412-43-1","classe":"4bis","sanctions":"90","immo":"","categorie":"EDPM","src":"OFF"},{"natinf":"213","libelle":"Conduite d'un véhicule a une vitesse excessive eu egard aux circonstances","article":"R.413-17","classe":"4bis","sanctions":"Dép. facul.","immo":"","categorie":"Vitesse","src":"OFF"},{"natinf":"6090","libelle":"Conduite d’un véhicule dans des conditions ne permettant pas au conducteur de manoeuvrer aisément Exemples : difficulté de mouvement (sandwich, habillement, chargement...), champ de vision (trop","article":"R.412-6","classe":"2bis","sanctions":"","immo":"","categorie":"Circulation","src":"MAR"}];
+
+// ---- ICONS ----
+var ICONS = {
+  "Vitesse":"⚡","Alcool - Stupéfiants":"🍺","Permis de conduire":"🪪",
+  "Assurance":"📋","Feux - Signalisation":"🚦","Priorité":"⬆️",
+  "Dépassement":"↔️","Circulation":"🔄","Stationnement":"🅿️",
+  "Comportement":"🎧","Deux-roues - Quads":"🏍️","EDPM":"🛴",
+  "Contrôle du véhicule":"🔧","Refus - Fuite":"🚨","Documents":"📄",
+  "Ceinture":"🔒","Éclairage":"💡","Poids - Chargement":"⚖️",
+  "Autoroute":"🛣️","Transports collectifs":"🚌","Divers":"📌",
+  "Téléphone - Équip.":"📱"
+};
+
+// ---- STATE ----
+var currentCat = "Tous";
+var currentQ = "";
+
+// ---- UTILS ----
+function esc(s) {
+  if (!s) return "";
+  return String(s)
+    .split("&").join("&amp;")
+    .split("<").join("&lt;")
+    .split(">").join("&gt;");
+}
+
+function escapeRegex(s) {
+  // Safe character-by-character escape, no regex on regex
+  var special = "\\^$.|?*+()[]{}";
+  var out = "";
+  for (var i = 0; i < s.length; i++) {
+    if (special.indexOf(s[i]) !== -1) {
+      out += "\\" + s[i];
+    } else {
+      out += s[i];
+    }
+  }
+  return out;
+}
+
+function highlight(s, q) {
+  var escaped = esc(s);
+  if (!q || q.length === 0) return escaped;
+  try {
+    var pattern = new RegExp("(" + escapeRegex(q) + ")", "gi");
+    return escaped.replace(pattern, "<mark>$1</mark>");
+  } catch(e) {
+    return escaped;
+  }
+}
+
+// ---- BUILD FILTER TABS ----
+var cats = ["Tous"];
+var seen = {};
+for (var i = 0; i < D.length; i++) {
+  var cat = D[i].categorie;
+  if (cat && !seen[cat]) { seen[cat] = 1; cats.push(cat); }
+}
+
+var fb = document.getElementById("fb");
+for (var i = 0; i < cats.length; i++) {
+  (function(c) {
+    var btn = document.createElement("button");
+    btn.className = "fb" + (c === "Tous" ? " on" : "");
+    var ico = ICONS[c] || "";
+    btn.textContent = (ico ? ico + " " : "") + c;
+    btn.onclick = function() {
+      currentCat = c;
+      var btns = fb.getElementsByTagName("button");
+      for (var j = 0; j < btns.length; j++) {
+        btns[j].className = "fb" + (btns[j].textContent.indexOf(c) !== -1 &&
+          (c === "Tous" ? btns[j].textContent === "Tous" : true) ? "" : "");
+      }
+      // Simpler: toggle all
+      var all = fb.querySelectorAll(".fb");
+      for (var j = 0; j < all.length; j++) {
+        all[j].className = "fb" + (j === cats.indexOf(c) ? " on" : "");
+      }
+      render();
+    };
+    fb.appendChild(btn);
+  })(cats[i]);
+}
+
+// ---- RENDER ----
+function render() {
+  var filtered = [];
+  var q = currentQ.toLowerCase();
+  for (var i = 0; i < D.length; i++) {
+    var d = D[i];
+    if (currentCat !== "Tous" && d.categorie !== currentCat) continue;
+    if (q) {
+      var haystack = (d.natinf + " " + d.libelle + " " + d.article + " " + (d.sanctions || "")).toLowerCase();
+      if (haystack.indexOf(q) === -1) continue;
+    }
+    filtered.push(i);
+  }
+
+  document.getElementById("bdg").textContent = filtered.length + " infraction" + (filtered.length > 1 ? "s" : "");
+
+  var li = document.getElementById("li");
+  var em = document.getElementById("em");
+
+  if (filtered.length === 0) {
+    li.innerHTML = "";
+    em.style.display = "block";
+    return;
+  }
+  em.style.display = "none";
+
+  // Group by category if needed
+  var showGroups = false;
+  if (currentCat === "Tous" || currentQ) {
+    var catSet = {};
+    for (var i = 0; i < filtered.length; i++) catSet[D[filtered[i]].categorie] = 1;
+    showGroups = Object.keys(catSet).length > 1;
+  }
+
+  // Trier par catégorie pour éviter les doublons de headers
+  if (showGroups) {
+    filtered.sort(function(a, b) {
+      var ca = D[a].categorie || "";
+      var cb = D[b].categorie || "";
+      if (ca < cb) return -1;
+      if (ca > cb) return 1;
+      return 0;
+    });
+  }
+
+  var html = "";
+  var lastCat = null;
+
+  for (var i = 0; i < filtered.length; i++) {
+    var idx = filtered[i];
+    var d = D[idx];
+    if (showGroups && d.categorie !== lastCat) {
+      var ico = ICONS[d.categorie] || "📌";
+      html += '<div class="ch">' + ico + " " + esc(d.categorie) + "</div>";
+      lastCat = d.categorie;
+    }
+    html += cardHtml(d, idx);
+  }
+  li.innerHTML = html;
+
+  // Attach click handlers
+  var cards = li.getElementsByClassName("card");
+  for (var i = 0; i < cards.length; i++) {
+    (function(el) {
+      el.addEventListener("click", function() {
+        var idx = parseInt(el.getAttribute("data-i"));
+        openModal(idx);
+      });
+    })(cards[i]);
+  }
+}
+
+function cardHtml(d, idx) {
+  var dl = d.classe === "DÉLIT";
+  var classCss = dl ? "td" : "tc";
+  var out = '<div class="card' + (dl ? " dl" : "") + '" data-i="' + idx + '">';
+  out += '<div class="ct">';
+  out += '<span class="nn">' + esc(d.natinf) + "</span>";
+  out += '<span class="lb">' + highlight(d.libelle, currentQ) + "</span>";
+  out += "</div>";
+  out += '<div class="cm">';
+  if (d.article) out += '<span class="t ta">' + esc(d.article) + "</span>";
+  if (d.classe && d.classe !== "nan") out += '<span class="t ' + classCss + '">' + esc(d.classe) + "</span>";
+  if (d.immo === "✓") out += '<span class="t ti">🚗 IMMO</span>';
+  if (d.sanctions && d.sanctions !== "nan") out += '<span class="t ts">' + highlight(d.sanctions, currentQ) + "</span>";
+  out += "</div>";
+  out += '<span class="cv">›</span>';
+  out += "</div>";
+  return out;
+}
+
+// ---- MODAL ----
+function openModal(idx) {
+  var d = D[idx];
+  if (!d) return;
+  var dl = d.classe === "DÉLIT";
+  var ico = ICONS[d.categorie] || "📌";
+  var html = "";
+  html += '<div class="mcat">' + ico + " " + esc(d.categorie) + "</div>";
+  html += '<div class="mn">NATINF ' + esc(d.natinf) + "</div>";
+  html += '<div class="mlib">' + esc(d.libelle) + "</div>";
+  html += '<div class="mr">';
+  html += '<div class="mf"><div class="mfl">Classe</div><div class="mfv' + (dl ? " dl" : "") + '">' + esc(d.classe || "—") + "</div></div>";
+  html += '<div class="mf"><div class="mfl">Article</div><div class="mfv">' + esc(d.article || "—") + "</div></div>";
+  if (d.immo === "✓") html += '<div class="mf"><div class="mfl">Immobilisation</div><div class="mfv im">✓ Possible</div></div>';
+  html += "</div>";
+  if (d.sanctions && d.sanctions !== "nan") {
+    html += '<div class="sb"><div class="mfl">Sanctions / Mesures</div><div class="mfv">' + esc(d.sanctions) + "</div></div>";
+  }
+  var srcCls = d.src === "OFF" ? "soff" : "smar";
+  var srcLbl = d.src === "OFF" ? "✓ Officiel" : "📋 Marmotte34";
+  html += '<div class="msrc">Source : <span class="' + srcCls + '">' + srcLbl + "</span></div>";
+  document.getElementById("mc").innerHTML = html;
+  document.getElementById("mo").className = "open";
+  document.getElementById("mo").style.display = "flex";
+}
+
+document.getElementById("mo").addEventListener("click", function(e) {
+  if (e.target === document.getElementById("mo")) closeModal();
+});
+document.getElementById("mh").addEventListener("click", closeModal);
+
+function closeModal() {
+  var mo = document.getElementById("mo");
+  mo.className = "";
+  mo.style.display = "none";
+}
+
+// Swipe down to close
+var ty0 = 0;
+document.getElementById("md").addEventListener("touchstart", function(e) {
+  ty0 = e.touches[0].clientY;
+}, false);
+document.getElementById("md").addEventListener("touchend", function(e) {
+  if (e.changedTouches[0].clientY - ty0 > 70) closeModal();
+}, false);
+
+// ---- SEARCH ----
+var siEl = document.getElementById("si");
+var sxEl = document.getElementById("sx");
+
+siEl.addEventListener("input", function() {
+  currentQ = siEl.value;
+  sxEl.style.display = currentQ ? "block" : "none";
+  render();
+});
+
+sxEl.addEventListener("click", function() {
+  siEl.value = "";
+  currentQ = "";
+  sxEl.style.display = "none";
+  render();
+});
+
+// ---- HEIGHT ----
+function setH() {
+  var hdH = document.getElementById("hd").offsetHeight;
+  document.getElementById("lw").style.height = (window.innerHeight - hdH) + "px";
+}
+setH();
+window.addEventListener("resize", setH);
+
+// ---- START ----
+render();
+</script>
+
+<div id="ios-hint" style="
+  position:fixed;bottom:0;left:0;right:0;
+  background:#1d2f45;border-top:2px solid #e8a317;
+  padding:12px 16px;display:flex;align-items:center;gap:12px;
+  font-size:13px;color:#e8edf2;z-index:300;
+  font-family:-apple-system,sans-serif;">
+  <span style="font-size:22px">📲</span>
+  <span>Appuyez sur <b style="color:#e8a317">Partager</b> puis <b style="color:#e8a317">Sur l'écran d'accueil</b> pour installer</span>
+  <button onclick="document.getElementById('ios-hint').style.display='none'"
+    style="margin-left:auto;background:none;border:none;color:#7a8fa4;font-size:22px;cursor:pointer;flex-shrink:0">×</button>
+</div>
+<script>
+// Show install hint only on iOS Safari, only once
+var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+var isStandalone = window.navigator.standalone;
+var dismissed = false;
+try { dismissed = localStorage.getItem("hint_dismissed") === "1"; } catch(e) {}
+if (!isIOS || isStandalone || dismissed) {
+  document.getElementById("ios-hint").style.display = "none";
+}
+document.querySelector("#ios-hint button").addEventListener("click", function() {
+  try { localStorage.setItem("hint_dismissed","1"); } catch(e) {}
+});
+// Adjust list height to account for banner
+if (isIOS && !isStandalone && !dismissed) {
+  var orig = setH;
+  setH = function() {
+    var hdH = document.getElementById("hd").offsetHeight;
+    var bnH = document.getElementById("ios-hint").offsetHeight;
+    document.getElementById("lw").style.height = (window.innerHeight - hdH - bnH) + "px";
+  };
+}
+</script>
+
+</body>
+</html>
